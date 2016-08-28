@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'idea'
+}
+
+group 'info.groodt'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+    setSourceCompatibility(JavaVersion.VERSION_1_8)
+    setTargetCompatibility(JavaVersion.VERSION_1_8)
+}
+
+dependencies {
+    compile 'com.netflix.hystrix:hystrix-core:1.5.3',
+            'com.google.guava:guava:19.0',
+            'ch.qos.logback:logback-classic:1.0.13',
+            'org.projectlombok:lombok:1.16.8'
+    testCompile 'org.codehaus.groovy:groovy-all:2.4.1',
+            'org.spockframework:spock-core:1.0-groovy-2.4',
+            'cglib:cglib-nodep:3.2.3'
+}
