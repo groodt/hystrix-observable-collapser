@@ -9,11 +9,10 @@ import rx.functions.Func1;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class BatchObservableCollapser extends HystrixObservableCollapser<String, Map<String, String>, String, String> {
+public class BatchObservableCollapser extends HystrixObservableCollapser<String, CacheResponse, String, String> {
 
     private final String key;
     private final Cache cache;
@@ -31,15 +30,15 @@ public class BatchObservableCollapser extends HystrixObservableCollapser<String,
     }
 
     @Override
-    protected HystrixObservableCommand<Map<String, String>> createCommand(Collection<HystrixCollapser.CollapsedRequest<String, String>> collapsedRequests) {
+    protected HystrixObservableCommand<CacheResponse> createCommand(Collection<HystrixCollapser.CollapsedRequest<String, String>> collapsedRequests) {
         List<String> keys = collapsedRequests.stream().map(HystrixCollapser.CollapsedRequest::getArgument).collect(Collectors.toList());
         log.info("Creating command with keys: {}", keys);
         return new BatchObservableCommand(keys, cache);
     }
 
     @Override
-    protected Func1<Map<String, String>, String> getBatchReturnTypeKeySelector() {
-        return (batch) -> key;
+    protected Func1<CacheResponse, String> getBatchReturnTypeKeySelector() {
+        return CacheResponse::getKey;
     }
 
     @Override
@@ -48,8 +47,8 @@ public class BatchObservableCollapser extends HystrixObservableCollapser<String,
     }
 
     @Override
-    protected Func1<Map<String, String>, String> getBatchReturnTypeToResponseTypeMapper() {
-        return (batch) -> batch.get(key);
+    protected Func1<CacheResponse, String> getBatchReturnTypeToResponseTypeMapper() {
+        return CacheResponse::getValue;
     }
 
     @Override

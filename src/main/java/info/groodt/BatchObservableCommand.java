@@ -3,12 +3,16 @@ package info.groodt;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.netflix.hystrix.HystrixObservableCommand;
+import lombok.extern.slf4j.Slf4j;
 import rx.Observable;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class BatchObservableCommand extends HystrixObservableCommand<Map<String, String>> {
+@Slf4j
+public class BatchObservableCommand extends HystrixObservableCommand<CacheResponse> {
 
     private final List<String> keys;
     private final Cache cache;
@@ -22,7 +26,13 @@ public class BatchObservableCommand extends HystrixObservableCommand<Map<String,
     }
 
     @Override
-    protected Observable<Map<String, String>> construct() {
-        return Observable.just(cache.getValues(keys));
+    protected Observable<CacheResponse> construct() {
+        Set<String> uniqueKeys = new HashSet<>(keys);
+        Map<String, String> values = cache.getValues(uniqueKeys);
+        return Observable.from(uniqueKeys).map(k -> {
+            CacheResponse cacheResponse = new CacheResponse(k, values.get(k));
+            log.info("Emitting response: {}", cacheResponse);
+            return cacheResponse;
+        });
     }
 }
