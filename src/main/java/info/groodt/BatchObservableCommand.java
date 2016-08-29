@@ -29,6 +29,7 @@ public class BatchObservableCommand extends HystrixObservableCommand<CacheRespon
     protected Observable<CacheResponse> construct() {
         Set<String> uniqueKeys = new HashSet<>(keys);
         Map<String, String> values = cache.getValues(uniqueKeys);
+        log.info("Values from cache: {}", values);
         return Observable.from(uniqueKeys).map(k -> {
             CacheResponse cacheResponse = new CacheResponse(k, values.get(k));
             log.info("Emitting response: {}", cacheResponse);

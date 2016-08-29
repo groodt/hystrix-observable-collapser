@@ -26,9 +26,13 @@ class BatchObservableCollapserTest extends Specification {
             def collapser2 = new BatchObservableCollapser(cacheKeys[1], cache).toObservable()
             def collapser3 = new BatchObservableCollapser(cacheKeys[2], cache).toObservable()
         when:
-            collapser1.toBlocking().toFuture().get()
-            collapser2.toBlocking().toFuture().get()
-            collapser3.toBlocking().toFuture().get()
+            def f1 = collapser1.toBlocking().toFuture()
+            def f2 = collapser2.toBlocking().toFuture()
+            def f3 = collapser3.toBlocking().toFuture()
+        and:
+            f1.get()
+            f2.get()
+            f3.get()
         then:
             1 * cache.getValues(cacheKeys) >> {
                 log.info("Fetching keys: {}", cacheKeys)
@@ -53,13 +57,17 @@ class BatchObservableCollapserTest extends Specification {
             def collapser2 = new BatchObservableCollapser(cacheKeys[1], cache).toObservable()
             def collapser3 = new BatchObservableCollapser(cacheKeys[2], cache).toObservable()
         when:
-            def value1 = collapser1.toBlocking().toFuture().get()
-            def value2 = collapser2.toBlocking().toFuture().get()
-            def value3 = collapser3.toBlocking().toFuture().get()
+            def f1 = collapser1.toBlocking().toFuture()
+            def f2 = collapser2.toBlocking().toFuture()
+            def f3 = collapser3.toBlocking().toFuture()
+        and:
+            def value1 = f1.get()
+            def value2 = f2.get()
+            def value3 = f3.get()
         then:
-            value1 == "value1"
-            value2 == null
-            value3 == "value3"
+            value1.value == "value1"
+            value2.value == null
+            value3.value == "value3"
     }
 
     def "correctly maps collapsed response to the individual requests even if there are duplicate keys"() {
@@ -79,12 +87,16 @@ class BatchObservableCollapserTest extends Specification {
             def collapser2 = new BatchObservableCollapser(duplicateKey, cache).toObservable()
             def collapser3 = new BatchObservableCollapser(duplicateKey, cache).toObservable()
         when:
-            def value1 = collapser1.toBlocking().toFuture().get()
-            def value2 = collapser2.toBlocking().toFuture().get()
-            def value3 = collapser3.toBlocking().toFuture().get()
+            def f1 = collapser1.toBlocking().toFuture()
+            def f2 = collapser2.toBlocking().toFuture()
+            def f3 = collapser3.toBlocking().toFuture()
+        and:
+            def value1 = f1.get()
+            def value2 = f2.get()
+            def value3 = f3.get()
         then:
-            value1 == key1Value
-            value2 == key1Value
-            value3 == key1Value
+            value1.value == key1Value
+            value2.value == key1Value
+            value3.value == key1Value
     }
 }

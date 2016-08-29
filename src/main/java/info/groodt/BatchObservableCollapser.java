@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class BatchObservableCollapser extends HystrixObservableCollapser<String, CacheResponse, String, String> {
+public class BatchObservableCollapser extends HystrixObservableCollapser<String, CacheResponse, CacheResponse, String> {
 
     private final String key;
     private final Cache cache;
@@ -30,7 +30,7 @@ public class BatchObservableCollapser extends HystrixObservableCollapser<String,
     }
 
     @Override
-    protected HystrixObservableCommand<CacheResponse> createCommand(Collection<HystrixCollapser.CollapsedRequest<String, String>> collapsedRequests) {
+    protected HystrixObservableCommand<CacheResponse> createCommand(Collection<HystrixCollapser.CollapsedRequest<CacheResponse, String>> collapsedRequests) {
         List<String> keys = collapsedRequests.stream().map(HystrixCollapser.CollapsedRequest::getArgument).collect(Collectors.toList());
         log.info("Creating command with keys: {}", keys);
         return new BatchObservableCommand(keys, cache);
@@ -47,12 +47,12 @@ public class BatchObservableCollapser extends HystrixObservableCollapser<String,
     }
 
     @Override
-    protected Func1<CacheResponse, String> getBatchReturnTypeToResponseTypeMapper() {
-        return CacheResponse::getValue;
+    protected Func1<CacheResponse, CacheResponse> getBatchReturnTypeToResponseTypeMapper() {
+        return (batch) -> batch;
     }
 
     @Override
-    protected void onMissingResponse(HystrixCollapser.CollapsedRequest<String, String> r) {
+    protected void onMissingResponse(HystrixCollapser.CollapsedRequest<CacheResponse, String> r) {
         throw new RuntimeException("Missing Response for request");
     }
 }

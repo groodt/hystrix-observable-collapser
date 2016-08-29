@@ -19,7 +19,7 @@ compileJava {
 }
 
 dependencies {
-    compile 'com.netflix.hystrix:hystrix-core:1.5.3',
+    compile 'com.netflix.hystrix:hystrix-core:1.5.5',
             'com.google.guava:guava:19.0',
             'ch.qos.logback:logback-classic:1.0.13',
             'org.projectlombok:lombok:1.16.8'
